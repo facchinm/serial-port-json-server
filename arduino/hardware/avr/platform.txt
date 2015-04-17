@@ -80,8 +80,6 @@ recipe.size.regex.eeprom=^(?:\.eeprom)\s+([0-9]+).*
 # AVR Uploader/Programmers tools
 # ------------------------------
 
-runtime.tools.avrdude.version=6.0.1-arduino1
-
 tools.avrdude.path={runtime.tools.avrdude.path}
 tools.avrdude.cmd.path={path}/bin/avrdude
 tools.avrdude.config.path={path}/etc/avrdude.conf
