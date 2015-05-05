@@ -72,10 +72,21 @@ func removeNonArduinoBoards(ports []OsSerialPort) []OsSerialPort {
 		findOut, _ := findcmd.Output()
 
 		boardName := strings.Split(string(findOut), "\n")[0]
+		// in this moment arch is the complete path of board.txt
+		arch := strings.Split(boardName, ":")[0]
 		boardName = strings.Split(boardName, ":")[1]
 		boardName = strings.Split(boardName, ".")[0]
+		archBoardName := boardName
 
-		log.Println(cmdOutMap)
+		// get board.name from board.txt
+		boardcmd := exec.Command("grep", "-r", boardName+".name", filepath.Dir(execPath)+"/arduino/hardware/")
+		boardOut, _ := boardcmd.Output()
+		boardName = string(boardOut)
+		boardName = strings.Split(boardName, "=")[1]
+
+		arch = filepath.Dir(arch)
+		arch_arr := strings.Split(arch, "/")
+		arch = arch_arr[len(arch_arr)-1]
 
 		// remove initial 0x and final zeros
 		ttyHeader := strings.Trim((cmdOutMap["Location ID"]), "0x")
@@ -85,7 +96,8 @@ func removeNonArduinoBoards(ports []OsSerialPort) []OsSerialPort {
 
 		for _, port := range ports {
 			if strings.Contains(port.Name, ttyHeader) && !strings.Contains(port.Name, "/cu.") {
-				port.FriendlyName = strings.Title(boardName)
+				port.RelatedNames = append(port.RelatedNames, "arduino:"+arch+":"+archBoardName)
+				port.FriendlyName = strings.Trim(boardName, "\n")
 				arduino_ports = append(arduino_ports, port)
 			}
 		}
