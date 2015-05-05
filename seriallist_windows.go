@@ -20,6 +20,10 @@ var (
 	serialListWindowsWg sync.WaitGroup
 )
 
+func removeNonArduinoBoards(ports []OsSerialPort) []OsSerialPort {
+	return ports
+}
+
 func getList() ([]OsSerialPort, os.SyscallError) {
 	// use a queue to do this to avoid conflicts
 	// we've been getting crashes when this getList is requested

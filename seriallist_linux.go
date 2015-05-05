@@ -19,6 +19,10 @@ import (
 	"sort"
 )
 
+func removeNonArduinoBoards(ports []OsSerialPort) []OsSerialPort {
+	return ports
+}
+
 func getList() ([]OsSerialPort, os.SyscallError) {
 
 	//return getListViaTtyList()
