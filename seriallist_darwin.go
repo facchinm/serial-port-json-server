@@ -3,7 +3,6 @@ package main
 import (
 	//"fmt"
 	//"github.com/tarm/goserial"
-	"github.com/kardianos/osext"
 	"log"
 	"os"
 	"strings"
@@ -14,24 +13,7 @@ import (
 	//"bufio"
 	"io/ioutil"
 	"os/exec"
-	"path/filepath"
 )
-
-func pipe_commands(commands ...*exec.Cmd) ([]byte, error) {
-	for i, command := range commands[:len(commands)-1] {
-		out, err := command.StdoutPipe()
-		if err != nil {
-			return nil, err
-		}
-		command.Start()
-		commands[i+1].Stdin = out
-	}
-	final, err := commands[len(commands)-1].Output()
-	if err != nil {
-		return nil, err
-	}
-	return final, nil
-}
 
 // execute system_profiler SPUSBDataType | grep "Vendor ID: 0x2341" -A5 -B2
 // maybe -B2 is not necessary
@@ -67,26 +49,7 @@ func removeNonArduinoBoards(ports []OsSerialPort) []OsSerialPort {
 			}
 		}
 
-		execPath, _ := osext.Executable()
-		findcmd := exec.Command("grep", "-r", cmdOutMap["Product ID"], filepath.Dir(execPath)+"/arduino/hardware/")
-		findOut, _ := findcmd.Output()
-
-		boardName := strings.Split(string(findOut), "\n")[0]
-		// in this moment arch is the complete path of board.txt
-		arch := strings.Split(boardName, ":")[0]
-		boardName = strings.Split(boardName, ":")[1]
-		boardName = strings.Split(boardName, ".")[0]
-		archBoardName := boardName
-
-		// get board.name from board.txt
-		boardcmd := exec.Command("grep", "-r", boardName+".name", filepath.Dir(execPath)+"/arduino/hardware/")
-		boardOut, _ := boardcmd.Output()
-		boardName = string(boardOut)
-		boardName = strings.Split(boardName, "=")[1]
-
-		arch = filepath.Dir(arch)
-		arch_arr := strings.Split(arch, "/")
-		arch = arch_arr[len(arch_arr)-1]
+		arch, archBoardName, boardName, _ := getBoardName(cmdOutMap["Product ID"])
 
 		// remove initial 0x and final zeros
 		ttyHeader := strings.Trim((cmdOutMap["Location ID"]), "0x")
